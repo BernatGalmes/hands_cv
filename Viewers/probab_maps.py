@@ -48,20 +48,20 @@ def get_image_prediction(clf, f, image_path):
     images = [
         {
             "img": im_original,
-            "title": "original"
+            "title": "Original image"
         },
         {
             "img": depth_image,
-            "title": "depth image",
+            "title": "Depth image",
             "colorbar": True
         },
         {
             "img": hand_mask,
-            "title": "ground truth"
+            "title": "Ground truth"
         },
         {
             "img": proba_mask,
-            "title": "result",
+            "title": "Probability to be hand",
             "colorbar": True
         }
     ]
@@ -85,13 +85,10 @@ if __name__ == "__main__":
     f = Features()
     f.as_DataFrame()
 
-
     plotter = InteractivePlot(4)
     plotter.set_authomatic_loop(True, 0.5)
 
-    path = config.FOLDER_DATA + "/datasets/BG_dataset/depth/*"
-    print(path)
-    dataset = glob(path)
+    dataset = glob(config.PATH_DATASET + "/*")
     dataset.sort()
     train, test = train_test_split(dataset, train_size=0.7, random_state=0)
     print(test)
