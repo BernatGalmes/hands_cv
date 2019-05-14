@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, '../../')
+
 import logging
 import os
 import time
@@ -12,7 +15,8 @@ from hands_rdf.hands_rdf.Model import config
 from hands_rdf.hands_rdf.RDF import RDF
 from hands_rdf.hands_rdf.features import Features
 from ovnImage.functions import check_dir
-from ovnImage.plots.InteractivePlot import InteractivePlot
+from ovnImage.plots.InteractivePlot import InteractivePlot, MultiPlot
+from ovnImage import images2video
 
 
 def get_image_prediction(clf, f, image_path):
@@ -71,9 +75,21 @@ def get_image_prediction(clf, f, image_path):
 log = logging.getLogger(__name__)
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%I:%M:%S', level=logging.DEBUG)
 
-N_TRY = 2
-RES_FOLDER = config.FOLDER_RESULTS + "class_proba/" + str(N_TRY) + "/"
-check_dir(RES_FOLDER)
+do_video = True
+N_TRY = 0
+
+if len(sys.argv) > 1:
+    experiment_name = sys.argv[1]
+
+else:
+    experiment_name = "class_proba"
+folder_results = config.FOLDER_RESULTS + experiment_name + "/" + str(N_TRY) + "/"
+folder_results_images = folder_results + "images/"
+
+video_fps = 1
+
+check_dir(folder_results_images)
+
 
 if __name__ == "__main__":
     logging.info("PROGRAM START")
@@ -85,22 +101,32 @@ if __name__ == "__main__":
     f = Features()
     f.as_DataFrame()
 
-    plotter = InteractivePlot(4)
-    plotter.set_authomatic_loop(True, 0.5)
+    if do_video:
+        plotter = MultiPlot(4)
+    else:
+        plotter = InteractivePlot(4)
+        plotter.set_authomatic_loop(True, 0.5)
 
     dataset = glob(config.PATH_DATASET + "/*")
     dataset.sort()
     train, test = train_test_split(dataset, train_size=0.7, random_state=0)
-    print(test)
+    # print(test)
 
-    config.save_txt(RES_FOLDER)
-    for i, image_path in enumerate(dataset):
-        im_name = os.path.basename(image_path)
+    config.save_txt(folder_results)
+    for i, image_path in enumerate(test):
+        im_name = os.path.basename(image_path).split(".")[0]
         images = get_image_prediction(clf, f, image_path)
 
-        plotter.multi(images, cmap='bwr')
-        # plotter.save_multiplot(
-        #     RES_FOLDER + im_name,
-        #     images,
-        #     cmap='bwr'
-        # )
+        if do_video:
+            plotter.save_multiplot(
+                folder_results_images + im_name + ".png",
+                images,
+                cmap='bwr'
+            )
+
+        else:
+            plotter.multi(images, cmap='bwr')
+
+    if do_video:
+        images2video(sorted(glob(folder_results_images + "*.png")),
+                     folder_results + "results.avi", video_fps)

@@ -33,7 +33,14 @@ def __save_info_files(f, save_path):
     excel_writer.save()
 
 
-def build_data(dataset, save_path, n_pixels_class=PIXELS_FOR_CLASS):
+def build_data(dataset: list, save_path: str, n_pixels_class: int=PIXELS_FOR_CLASS):
+    """
+
+    :param dataset: list of images
+    :param save_path: string with the path where we store the data files build
+    :param n_pixels_class:
+    :return:
+    """
     n_samples_img = 2*n_pixels_class
 
     check_dir(save_path)
@@ -64,20 +71,18 @@ def build_data(dataset, save_path, n_pixels_class=PIXELS_FOR_CLASS):
                 continue
 
             body_mask = (hand_mask == 0) & roi_depth_image(depth_image, bg_value)
+            y_hand, x_hand = np.nonzero(hand_mask.astype(np.bool) & roi_depth_image(depth_image, bg_value))
             y_body, x_body = np.nonzero(body_mask)
-            if len(y_body) == 0:
-                logging.debug('No body pixels found')
+            if len(y_body) == 0 or len(y_hand) == 0:
+                logging.debug('Skipping: Image with no body or hand pixels')
                 continue
 
-            i = np.random.uniform(0, len(y_body), n_pixels_class).astype(np.uint16)
+            n_pixels = np.min([n_pixels_class, len(y_body)])
+            i = np.random.uniform(0, len(y_body), n_pixels).astype(np.uint16)
             i_body = (y_body[i], x_body[i])
 
-            y_hand, x_hand = np.nonzero(hand_mask.astype(np.bool) & roi_depth_image(depth_image, bg_value))
-            if len(y_hand) == 0:
-                logging.debug('No hand pixels found')
-                continue
-
-            i = np.random.uniform(0, len(y_hand), n_pixels_class).astype(np.uint16)
+            n_pixels = np.min([n_pixels_class, len(y_hand)])
+            i = np.random.uniform(0, len(y_hand), n_pixels).astype(np.uint16)
             i_Hand = (y_hand[i], x_hand[i])
 
             indexs = tuple(np.hstack((i_Hand, i_body)))

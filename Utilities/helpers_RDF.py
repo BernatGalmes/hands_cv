@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, '../../')
+
 import cv2
 import numpy as np
 from hands_rdf.hands_rdf.Model.Config import config

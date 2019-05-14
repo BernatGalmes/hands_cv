@@ -19,10 +19,8 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == "__main__":
-
-    d2 = glob(config.PATH_DATASET + "/*")
+    dataset = glob(config.PATH_DATASET + "/*")
     print(config.PATH_DATASET + "/*")
-    dataset = d2
-
+    dataset.sort()
     # Split the dataset in two parts:
     retrieve_data(dataset)
