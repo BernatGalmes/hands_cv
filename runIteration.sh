@@ -8,5 +8,5 @@ cd ModelBuilder
 
 echo "Generating the results"
 cd ../Viewers
-~/.conda/envs/hands-env/bin/python probab_maps.py
+~/.conda/envs/hands-env/bin/python probab_maps.py "third_iteration" BG_dataset/depth BG_dataset/depth
 

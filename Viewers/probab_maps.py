@@ -11,9 +11,12 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 from hands_cv.Utilities.helpers_RDF import read_depth_image, get_prediction
+from sklearn.metrics import cohen_kappa_score, classification_report
 from hands_rdf.hands_rdf.Model import config
 from hands_rdf.hands_rdf.RDF import RDF
 from hands_rdf.hands_rdf.features import Features
+from hands_rdf.hands_rdf.helpers import show_stats
+
 from ovnImage.functions import check_dir
 from ovnImage.plots.InteractivePlot import InteractivePlot, MultiPlot
 from ovnImage import images2video
@@ -78,11 +81,20 @@ logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%I:%M:%S', level=
 do_video = True
 N_TRY = 0
 
+if len(sys.argv) > 3:
+    PATH_IMAGES = config.PATH_DATASETS + sys.argv[3]
+else:
+    PATH_IMAGES = config.PATH_DATASET
+
+if len(sys.argv) > 2:
+    config.DATASET = sys.argv[2]
+
 if len(sys.argv) > 1:
     experiment_name = sys.argv[1]
 
 else:
     experiment_name = "class_proba"
+
 folder_results = config.FOLDER_RESULTS + experiment_name + "/" + str(N_TRY) + "/"
 folder_results_images = folder_results + "images/"
 
@@ -94,7 +106,28 @@ check_dir(folder_results_images)
 if __name__ == "__main__":
     logging.info("PROGRAM START")
 
+    logging.info("Building RDF using files in " + config.FOLDER_RAW_DATA)
     clf = RDF()
+    from hands_rdf.hands_rdf.Model.MultiModels import TestModels
+
+    y_real_all = []
+    y_pred_all = []
+
+    for file, model in TestModels(mode="npy"):
+        X_test, y_test = model[:, :-1], model[:, -1]
+        y_pred = clf.predict(X_test)
+
+        y_real_all.extend(y_test)
+        y_pred_all.extend(y_pred)
+
+    results = show_stats(y_real_all, y_pred_all)
+
+    with open(folder_results + "report.txt", "w") as fw:
+        fw.write(classification_report(y_real_all, y_pred_all))
+
+        cohenKappa = cohen_kappa_score(y_real_all, y_pred_all)
+        fw.write("Cohen kappa score: " + str(cohenKappa))
+
     print(clf)
 
     # Getting features
@@ -107,10 +140,10 @@ if __name__ == "__main__":
         plotter = InteractivePlot(4)
         plotter.set_authomatic_loop(True, 0.5)
 
-    dataset = glob(config.PATH_DATASET + "/*")
+    dataset = glob(PATH_IMAGES + "/*")
     dataset.sort()
+
     train, test = train_test_split(dataset, train_size=0.7, random_state=0)
-    # print(test)
 
     config.save_txt(folder_results)
     for i, image_path in enumerate(test):
@@ -129,4 +162,4 @@ if __name__ == "__main__":
 
     if do_video:
         images2video(sorted(glob(folder_results_images + "*.png")),
-                     folder_results + "results.avi", video_fps)
+                     folder_results + experiment_name + ".avi", video_fps)
