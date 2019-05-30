@@ -48,10 +48,8 @@ def get_prediction(clf, f, depth_image, bg_val, get_proba=True):
         return np.zeros((depth_image.shape[0], depth_image.shape[1]),
                         dtype=np.float32)
     # Retrieving data
-    print("Retrieving data")
     positions, features = f.get_image_features(depth_image, indexs)
 
-    print("predicting")
     proba_mask = np.zeros((depth_image.shape[0], depth_image.shape[1]),
                           dtype=np.float32)
     if get_proba:
