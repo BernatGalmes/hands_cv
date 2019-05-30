@@ -1,6 +1,8 @@
+import os
 import json
 import logging
 import threading
+import shutil
 
 import numpy as np
 import pandas as pd
@@ -41,6 +43,8 @@ def build_data(dataset: list, save_path: str, n_pixels_class: int=PIXELS_FOR_CLA
     :param n_pixels_class:
     :return:
     """
+    if os.path.exists(save_path) and os.path.isdir(save_path):
+        shutil.rmtree(save_path)
     n_samples_img = 2*n_pixels_class
 
     check_dir(save_path)

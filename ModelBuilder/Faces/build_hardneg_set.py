@@ -40,7 +40,7 @@ check_dir(FOLDER_test)
 
 min_samples_leaf = config.rf_min_samples_leaf
 
-print("Running version:", config.VERSION)
+logging.info("Running version: " + config.VERSION)
 
 # Specify the list of datasets to use to train
 DATASETS_train = [
@@ -54,12 +54,20 @@ DATASETS_test = [
 
 
 def build_set(models, paths_faces_models, path_save):
+    """
+
+    :param models: MultiModels subsets of data files
+    :param paths_faces_models: list of *.npy files with the faces data
+    :param path_save: String Folder path where save the resuling matrix
+
+    :return: None
+    """
     n_models = len(models)
 
-    models_indexs = []  # np.full((n_models, n_models), dtype=object)
+    models_indexs = []
     faces_models_indexs = []
 
-    print("selecting indexes ...")
+    logging.info("selecting indexes ...")
 
     # mark model indexes
     for i, (file, model) in enumerate(models):
@@ -79,9 +87,9 @@ def build_set(models, paths_faces_models, path_save):
         )
     faces_models_indexs = np.array(faces_models_indexs)
 
-    print("\ncreating models ...")
+    logging.info("\ncreating models ...")
     for n_file in range(n_models):
-        print("Building matrix ...")
+        logging.info("Building matrix ...")
 
         n_samples_file = 0
         for i in range(len(models)):
@@ -90,10 +98,10 @@ def build_set(models, paths_faces_models, path_save):
         for i in range(len(paths_faces_models)):
             n_samples_file += len(faces_models_indexs[i][n_file])
 
-        print("number of samples in file:", n_samples_file)
+        logging.debug("number of samples in file:" + str(n_samples_file))
         idx_row = 0
         samples = np.zeros((n_samples_file, models[0][1].shape[1]), dtype=np.int8)
-        print("shape: ", samples.shape)
+        logging.debug("shape: " + str(samples.shape))
         for i, (file, model) in enumerate(models):
             model_samples = model[models_indexs[i][n_file], :]
             samples[idx_row:idx_row + len(model_samples), :] = model_samples
