@@ -13,19 +13,25 @@ print(__doc__)
 import sys
 sys.path.insert(0, '../../')
 
+import argparse
 import logging
 from glob import glob
 
 from hands_rdf.hands_rdf.Model import config
 from hands_cv.Utilities.data_retrieval import retrieve_data
 
-if len(sys.argv) > 1:
-    PATH_IMAGES = config.PATH_DATASETS + sys.argv[1]
-else:
-    PATH_IMAGES = config.PATH_DATASET
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--path_images', help='foo help')
+
+args = config.set_arguments(parser)
+if args.path_images:
+    PATH_IMAGES = config.PATH_DATASETS + args.path_images
+else:
+    PATH_IMAGES = config.PATH_DATASET
 
 if __name__ == "__main__":
 

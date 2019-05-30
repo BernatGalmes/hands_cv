@@ -1,6 +1,7 @@
 import sys
 sys.path.insert(0, '../../')
 
+import argparse
 import logging
 import os
 import time
@@ -81,16 +82,17 @@ logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%I:%M:%S', level=
 do_video = True
 N_TRY = 0
 
-if len(sys.argv) > 3:
-    PATH_IMAGES = config.PATH_DATASETS + sys.argv[3]
+parser = argparse.ArgumentParser()
+parser.add_argument('--path_images', help='foo help')
+parser.add_argument('--name', help='foo help')
+args = config.set_arguments(parser)
+if args.path_images:
+    PATH_IMAGES = config.PATH_DATASETS + args.path_images
 else:
     PATH_IMAGES = config.PATH_DATASET
 
-if len(sys.argv) > 2:
-    config.DATASET = sys.argv[2]
-
-if len(sys.argv) > 1:
-    experiment_name = sys.argv[1]
+if args.name:
+    experiment_name = args.name
 
 else:
     experiment_name = "class_proba"
@@ -102,6 +104,7 @@ video_fps = 1
 
 check_dir(folder_results_images)
 
+config.set_arguments()
 
 if __name__ == "__main__":
     logging.info("PROGRAM START")
