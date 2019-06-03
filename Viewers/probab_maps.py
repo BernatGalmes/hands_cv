@@ -80,22 +80,28 @@ log = logging.getLogger(__name__)
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%I:%M:%S', level=logging.DEBUG)
 
 do_video = True
-N_TRY = 0
+N_TRY = 1
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--path_images', help='foo help')
+
 parser.add_argument('--name', help='foo help')
+parser.add_argument('--path_dataset', help='foo help')
+parser.add_argument('--path_images', help='foo help')
+
 args = config.set_arguments(parser)
 if args.path_images:
     PATH_IMAGES = config.PATH_DATASETS + args.path_images
 else:
     PATH_IMAGES = config.PATH_DATASET
 
+if args.path_dataset:
+    config.DATASET = args.path_dataset
+    
 if args.name:
     experiment_name = args.name
 
 else:
-    experiment_name = "class_proba"
+    experiment_name = "proba_images"
 
 folder_results = config.FOLDER_RESULTS + experiment_name + "/" + str(N_TRY) + "/"
 folder_results_images = folder_results + "images/"

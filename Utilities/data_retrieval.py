@@ -13,9 +13,6 @@ from hands_rdf.hands_rdf.features import Features
 from hands_rdf.hands_rdf.Model import config
 from ovnImage import check_dir
 
-PIXELS_FOR_CLASS = config.DATA_PIXELS_CLASS
-IMAGES_IN_FILE = config.DATA_IMS_IN_FILE
-
 
 def __save_data(data, i_group, save_path):
 
@@ -35,17 +32,19 @@ def __save_info_files(f, save_path):
     excel_writer.save()
 
 
-def build_data(dataset: list, save_path: str, n_pixels_class: int=PIXELS_FOR_CLASS):
+def build_data(dataset: list, save_path: str, max_pixels_class: int = config.DATA_PIXELS_CLASS,
+               n_ims_in_file: int = config.DATA_IMS_IN_FILE):
     """
 
     :param dataset: list of images
     :param save_path: string with the path where we store the data files build
-    :param n_pixels_class:
+    :param max_pixels_class: Number of pixels to each class to take
+    :param n_ims_in_file: Number of images to use in each subset
     :return:
     """
     if os.path.exists(save_path) and os.path.isdir(save_path):
         shutil.rmtree(save_path)
-    n_samples_img = 2*n_pixels_class
+    n_samples_img = 2*max_pixels_class
 
     check_dir(save_path)
     f = Features(all_offsets=True)
@@ -58,7 +57,7 @@ def build_data(dataset: list, save_path: str, n_pixels_class: int=PIXELS_FOR_CLA
     last_im_group = 0
     i_group = 0
     while last_im_group != len(dataset):
-        last_im_group = ini_group + IMAGES_IN_FILE
+        last_im_group = ini_group + n_ims_in_file
 
         if last_im_group > len(dataset):
             last_im_group = len(dataset)
@@ -81,11 +80,12 @@ def build_data(dataset: list, save_path: str, n_pixels_class: int=PIXELS_FOR_CLA
                 logging.debug('Skipping: Image with no body or hand pixels')
                 continue
 
-            n_pixels = np.min([n_pixels_class, len(y_body)])
+            # Ensure taking the same number of pixels of each class
+            n_pixels = np.min([max_pixels_class, len(y_body), len(y_hand)])
+
             i = np.random.uniform(0, len(y_body), n_pixels).astype(np.uint16)
             i_body = (y_body[i], x_body[i])
 
-            n_pixels = np.min([n_pixels_class, len(y_hand)])
             i = np.random.uniform(0, len(y_hand), n_pixels).astype(np.uint16)
             i_Hand = (y_hand[i], x_hand[i])
 
@@ -118,10 +118,10 @@ def build_data(dataset: list, save_path: str, n_pixels_class: int=PIXELS_FOR_CLA
     logging.debug('Processes ended')
 
 
-def retrieve_data(dataset, n_pixels_class=PIXELS_FOR_CLASS):
+def retrieve_data(dataset, n_pixels_class=config.DATA_PIXELS_CLASS, n_ims_in_file: int = config.DATA_IMS_IN_FILE):
     print("total images: %", len(dataset))
     train_size = 0.7
 
     train, test = train_test_split(dataset, train_size=train_size, random_state=0)
-    build_data(train, config.FOLDER_TRAIN, n_pixels_class=n_pixels_class)
-    build_data(test, config.FOLDER_TEST)
+    build_data(train, config.FOLDER_TRAIN, max_pixels_class=n_pixels_class, n_ims_in_file=n_ims_in_file)
+    build_data(test, config.FOLDER_TEST, n_ims_in_file=n_ims_in_file)
