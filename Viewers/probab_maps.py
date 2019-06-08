@@ -13,10 +13,12 @@ from sklearn.model_selection import train_test_split
 
 from hands_cv.Utilities.helpers_RDF import read_depth_image, get_prediction
 from sklearn.metrics import cohen_kappa_score, classification_report
-from hands_rdf.hands_rdf.Model import config
+
 from hands_rdf.hands_rdf.RDF import RDF
 from hands_rdf.hands_rdf.features import Features
 from hands_rdf.hands_rdf.helpers import show_stats
+from hands_rdf.hands_rdf.Model import config
+from hands_rdf.hands_rdf.Model.MultiModels import TestModels
 
 from ovnImage.functions import check_dir
 from ovnImage.plots.InteractivePlot import InteractivePlot, MultiPlot
@@ -87,6 +89,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--name', help='foo help')
 parser.add_argument('--path_dataset', help='foo help')
 parser.add_argument('--path_images', help='foo help')
+parser.add_argument('--n_train_set', help='foo help')
+parser.add_argument('--n_test_set', help='foo help')
 
 args = config.set_arguments(parser)
 if args.path_images:
@@ -96,12 +100,13 @@ else:
 
 if args.path_dataset:
     config.DATASET = args.path_dataset
-    
+
 if args.name:
     experiment_name = args.name
 
 else:
     experiment_name = "proba_images"
+
 
 folder_results = config.FOLDER_RESULTS + experiment_name + "/" + str(N_TRY) + "/"
 folder_results_images = folder_results + "images/"
@@ -110,15 +115,21 @@ video_fps = 1
 
 check_dir(folder_results_images)
 
-config.set_arguments()
+#
 
 if __name__ == "__main__":
     logging.info("PROGRAM START")
+    print(config.__str__())
+    if args.n_train_set:
+        config.DATASET = config.DATASETS[int(args.n_train_set)]
 
     logging.info("Building RDF using files in " + config.FOLDER_RAW_DATA)
     clf = RDF()
-    from hands_rdf.hands_rdf.Model.MultiModels import TestModels
 
+    if args.n_test_set:
+        config.DATASET = config.DATASETS[int(args.n_test_set)]
+
+    logging.info("Testing with files in " + config.FOLDER_RAW_DATA)
     y_real_all = []
     y_pred_all = []
 

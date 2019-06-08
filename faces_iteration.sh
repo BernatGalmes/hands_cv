@@ -14,5 +14,4 @@ echo "Building the dataset ..."
 
 echo "Generating the results of the built dataset"
 cd ../../Viewers
-~/.conda/envs/hands-env/bin/python probab_maps.py "fourth_iteration" BG_dataset_faces/ BG_dataset/depth
-
+~/.conda/envs/hands-env/bin/python probab_maps.py --name "faces_data" --n_train_set 2 --n_test_set 0 --path_images BG_dataset/depth
